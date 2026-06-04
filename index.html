@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulación numérica de abastecimiento, precios y conflicto social</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="hero" id="inicio">
+    <nav class="navbar">
+      <div class="brand">Métodos Numéricos</div>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+      <div class="nav-links" id="navLinks">
+        <a href="#inicio">Inicio</a>
+        <a href="#sistemas">Sistemas</a>
+        <a href="#raices">Raíces</a>
+        <a href="#interpolacion">Interpolación</a>
+        <a href="#integracion">Integración</a>
+        <a href="#reservas">Reservas</a>
+        <a href="#rumores">Rumores</a>
+        <a href="#social">Modelo social</a>
+      </div>
+    </nav>
+    <div class="hero-content">
+      <p class="tag">Proyecto final interactivo</p>
+      <h1>Simulación numérica de abastecimiento, precios y conflicto social en contexto de crisis</h1>
+      <p>
+        Herramienta web para analizar escenarios de abastecimiento, transporte, variación de precios,
+        costos familiares, reservas de carburantes, rumores de desabastecimiento y dinámica social mediante métodos numéricos.
+      </p>
+      <div class="hero-actions">
+        <a href="#sistemas" class="btn primary">Iniciar simulación</a>
+        <a href="#conclusiones" class="btn secondary">Ver conclusiones</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card intro">
+      <h2>Contexto y objetivo del proyecto</h2>
+      <p>
+        En situaciones de crisis pueden aparecer problemas de transporte, escasez percibida,
+        incremento de precios, bloqueos y pérdida del poder adquisitivo. El propósito de esta página es
+        mostrar cómo los métodos numéricos permiten modelar escenarios reales, comparar alternativas y apoyar la toma de decisiones sin emitir posicionamientos políticos.
+      </p>
+      <div class="grid-3">
+        
+      </div>
+    </section>
+
+    <section class="card module" id="sistemas">
+      <div class="module-head">
+        <span class="badge">Escenario A</span>
+        <h2>Optimización del abastecimiento y red de transporte</h2>
+      </div>
+      <p>
+        El sistema lineal representa la distribución requerida hacia tres zonas. La matriz A contiene la relación de capacidad, costo o restricción de rutas; el vector b representa la demanda o necesidad mínima de cada zona.
+      </p>
+      <div class="form-grid">
+        <label>Matriz A 3x3 <small>filas separadas por punto y coma</small>
+          <textarea id="linA" rows="4">5,1,1;1,4,1;1,1,3</textarea>
+        </label>
+        <label>Vector b
+          <input id="linB" value="110,95,80" />
+        </label>
+        <label>Método
+          <select id="linMethod">
+            <option value="lu">LU</option>
+            <option value="jacobi">Jacobi</option>
+            <option value="gs">Gauss-Seidel</option>
+            <option value="sor">SOR</option>
+            <option value="cg">Gradiente conjugado</option>
+          </select>
+        </label>
+        <label>ω para SOR
+          <input type="number" step="0.01" id="omega" value="1.15" />
+        </label>
+        <label>Tolerancia
+          <input type="number" step="0.000001" id="linTol" value="0.0001" />
+        </label>
+        <label>Iteraciones máximas
+          <input type="number" id="linMaxIter" value="50" />
+        </label>
+      </div>
+      <button class="btn primary" onclick="runLinear()">Resolver sistema</button>
+      <div id="linearResult" class="result"></div>
+      <canvas id="linearChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          LU factoriza la matriz en L y U para resolver por sustitución. Jacobi, Gauss-Seidel y SOR aproximan la solución iterando hasta que el error sea menor a la tolerancia. El gradiente conjugado se aplica directamente si la matriz es simétrica definida positiva; si no lo es, se resuelven las ecuaciones normales AᵀAx=Aᵀb.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="reservas">
+      <div class="module-head">
+        <span class="badge">Escenario B</span>
+        <h2>Vaciado crítico de reservas de carburantes</h2>
+      </div>
+      <p>
+        Se modela la reserva R(t) mediante la ecuación diferencial R'(t)=entrada−consumo(t). El consumo puede crecer por aumento de demanda, bloqueo o compras por pánico.
+      </p>
+      <div class="form-grid">
+        <label>Reserva inicial R(0)
+          <input type="number" id="r0" value="50000" />
+        </label>
+        <label>Entrada diaria
+          <input type="number" id="entrada" value="2500" />
+        </label>
+        <label>Consumo base diario
+          <input type="number" id="consumo" value="4200" />
+        </label>
+        <label>Crecimiento del consumo % por día
+          <input type="number" step="0.1" id="crecConsumo" value="1.8" />
+        </label>
+        <label>Nivel crítico
+          <input type="number" id="critico" value="10000" />
+        </label>
+        <label>Días de simulación
+          <input type="number" id="diasReservas" value="30" />
+        </label>
+        <label>Paso h
+          <input type="number" step="0.1" id="hReservas" value="1" />
+        </label>
+      </div>
+      <button class="btn primary" onclick="runReserves()">Simular reservas</button>
+      <div id="reservesResult" class="result"></div>
+      <canvas id="reservesChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          Euler usa la pendiente al inicio del intervalo. Heun corrige con una pendiente promedio. RK4 combina cuatro pendientes y suele entregar una aproximación más estable para el mismo tamaño de paso.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="interpolacion">
+      <div class="module-head">
+        <span class="badge">Escenario C</span>
+        <h2>Desabastecimiento de alimentos y curva continua de precios</h2>
+      </div>
+      <p>
+        A partir de datos dispersos por día se reconstruye la curva de precios para estimar valores faltantes y observar la tendencia mensual.
+      </p>
+      <div class="form-grid">
+        <label>Días conocidos
+          <input id="interpX" value="1,5,10,15,20,30" />
+        </label>
+        <label>Precios conocidos Bs
+          <input id="interpY" value="8,10,13,16,19,22" />
+        </label>
+        <label>Día a estimar
+          <input type="number" id="interpEval" value="12" />
+        </label>
+      </div>
+      <button class="btn primary" onclick="runInterpolation()">Interpolar precios</button>
+      <div id="interpResult" class="result"></div>
+      <canvas id="interpChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          Lagrange y Newton generan un polinomio que pasa por todos los puntos conocidos. El spline cúbico natural divide la curva en tramos suaves, lo que reduce oscilaciones cuando los datos están separados.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="integracion">
+      <div class="module-head">
+        <span class="badge">Escenario D</span>
+        <h2>Costo acumulado y pérdida del poder adquisitivo familiar</h2>
+      </div>
+      <p>
+        El gasto mensual se interpreta como el área bajo la curva del costo diario de la canasta. Se comparan Trapecio, Simpson 1/3 y Simpson 3/8.
+      </p>
+      <div class="form-grid">
+        <label>Días o tiempo x
+          <input id="intX" />
+        </label>
+        <label>Costo diario Bs
+          <textarea id="intY" rows="4"></textarea>
+        </label>
+      </div>
+      <button class="btn primary" onclick="loadDefaultIntegration()">Cargar datos ejemplo</button>
+      <button class="btn primary" onclick="runIntegration()">Calcular gasto acumulado</button>
+      <div id="integrationResult" class="result"></div>
+      <canvas id="integrationChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          La regla del trapecio aproxima el área mediante trapecios. Simpson 1/3 usa parábolas y requiere número par de subintervalos. Simpson 3/8 usa polinomios cúbicos y requiere subintervalos múltiplos de tres.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="raices">
+      <div class="module-head">
+        <span class="badge">Escenario E</span>
+        <h2>Umbrales críticos de abastecimiento y poder adquisitivo</h2>
+      </div>
+      <p>
+        Se busca la raíz de f(x)=ax²+bx+c. En este proyecto, f(x) puede representar gasto acumulado menos ingreso disponible. La raíz marca el día o nivel donde el gasto supera el límite familiar.
+      </p>
+      <div class="form-grid">
+        <label>Coeficiente a
+          <input type="number" step="0.01" id="rootA" value="1.5" />
+        </label>
+        <label>Coeficiente b
+          <input type="number" step="0.01" id="rootB" value="90" />
+        </label>
+        <label>Coeficiente c
+          <input type="number" step="0.01" id="rootC" value="-2500" />
+        </label>
+        <label>Intervalo inferior
+          <input type="number" step="0.01" id="rootL" value="0" />
+        </label>
+        <label>Intervalo superior
+          <input type="number" step="0.01" id="rootU" value="30" />
+        </label>
+        <label>x0 Newton
+          <input type="number" step="0.01" id="rootX0" value="15" />
+        </label>
+        <label>x0 Secante
+          <input type="number" step="0.01" id="secX0" value="5" />
+        </label>
+        <label>x1 Secante
+          <input type="number" step="0.01" id="secX1" value="30" />
+        </label>
+      </div>
+      <button class="btn primary" onclick="runRoots()">Buscar raíz</button>
+      <div id="rootsResult" class="result"></div>
+      <canvas id="rootsChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          Bisección reduce el intervalo donde cambia el signo. Newton-Raphson usa derivadas para acelerar la convergencia. Secante aproxima la derivada con dos puntos consecutivos.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="rumores">
+      <div class="module-head">
+        <span class="badge">Escenario F</span>
+        <h2>Rumores de desabastecimiento y pánico en la red de distribución</h2>
+      </div>
+      <p>
+        Un sistema mal condicionado puede amplificar cambios pequeños en la demanda. Aquí se compara la solución base con una solución perturbada por rumores y compras impulsivas.
+      </p>
+      <div class="form-grid">
+        <label>Matriz de sensibilidad A
+          <textarea id="rumorA" rows="4">1,0.99,0.98;0.99,0.982,0.971;0.98,0.971,0.964</textarea>
+        </label>
+        <label>Demanda base b
+          <input id="rumorB" value="238,235.82,233.52" />
+        </label>
+        <label>Aumento artificial de demanda %
+          <input type="number" id="rumorPct" value="5" />
+        </label>
+        <label>Reducción de stock %
+          <input type="number" id="stockPct" value="3" />
+        </label>
+      </div>
+      <button class="btn primary" onclick="runRumors()">Analizar sensibilidad</button>
+      <div id="rumorResult" class="result"></div>
+      <canvas id="rumorChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          Se calcula el número de condición aproximado con norma 1. Luego se perturban los datos y se mide el cambio relativo de la solución. Si el cambio relativo de la solución es mucho mayor que el cambio de entrada, el sistema es sensible o mal condicionado.
+        </p>
+      </details>
+    </section>
+
+    <section class="card module" id="social">
+      <div class="module-head">
+        <span class="badge">Escenario G</span>
+        <h2>Modelo de difusión de opinión o descontento social</h2>
+      </div>
+      <p>
+        Se simula la evolución de ciudadanos neutrales N(t), manifestantes activos M(t) y mediadores D(t). El modelo permite observar cuándo el conflicto se estabiliza o se masifica.
+      </p>
+      <div class="form-grid">
+        <label>N(0) neutrales
+          <input type="number" id="N0" value="900" />
+        </label>
+        <label>M(0) manifestantes
+          <input type="number" id="M0" value="80" />
+        </label>
+        <label>D(0) mediadores
+          <input type="number" id="D0" value="20" />
+        </label>
+        <label>a influencia
+          <input type="number" step="0.0001" id="coefA" value="0.0006" />
+        </label>
+        <label>b retorno a neutralidad
+          <input type="number" step="0.0001" id="coefB" value="0.04" />
+        </label>
+        <label>c efectividad de diálogo
+          <input type="number" step="0.0001" id="coefC" value="0.0007" />
+        </label>
+        <label>k reacción mediadora
+          <input type="number" step="0.0001" id="coefK" value="0.05" />
+        </label>
+        <label>r desgaste mediador
+          <input type="number" step="0.0001" id="coefR" value="0.03" />
+        </label>
+        <label>Días
+          <input type="number" id="socialDays" value="30" />
+        </label>
+        <label>Paso h
+          <input type="number" step="0.1" id="socialH" value="1" />
+        </label>
+        <label>Método
+          <select id="socialMethod">
+            <option value="rk4">RK4</option>
+            <option value="heun">Heun</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn primary" onclick="runSocial()">Simular dinámica social</button>
+      <div id="socialResult" class="result"></div>
+      <canvas id="socialChart"></canvas>
+      <details>
+        <summary>Algoritmo utilizado</summary>
+        <p>
+          Heun usa un predictor-corrector para cada población. RK4 evalúa cuatro pendientes por paso y entrega mayor estabilidad en sistemas acoplados no lineales.
+        </p>
+      </details>
+    </section>
+
+    <section class="card" id="conclusiones">
+      <h2>Conclusiones y limitaciones del modelo</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Conclusiones</h3>
+          <ul>
+            <li>Los sistemas lineales ayudan a asignar recursos y detectar zonas más afectadas por cambios de demanda o bloqueo de rutas.</li>
+            <li>Los métodos de raíces permiten identificar umbrales críticos, como el punto donde el gasto acumulado supera el ingreso familiar.</li>
+            <li>La interpolación facilita reconstruir curvas de precios cuando solo existen datos dispersos.</li>
+            <li>La integración numérica cuantifica el impacto económico acumulado de la subida de precios.</li>
+            <li>Las ecuaciones diferenciales permiten simular reservas y dinámicas sociales en el tiempo.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Limitaciones</h3>
+          <ul>
+            <li>Los modelos usan datos de ejemplo y no reemplazan información oficial ni estudios de campo.</li>
+            <li>Los resultados dependen de los parámetros ingresados por el usuario.</li>
+            <li>La realidad social y económica contiene factores no incluidos, como decisiones institucionales, clima, logística real y comportamiento individual.</li>
+            <li>La simulación es académica y busca explicar el uso de métodos numéricos, no realizar predicciones definitivas.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Proyecto final de Métodos Numéricos</p>
+  </footer>
+
+  <script src="assets/script.js"></script>
+</body>
+</html>
